@@ -197,34 +197,33 @@
                 </div>
             </div>
             <?php
-              $stmt = $conn->prepare("SELECT simule_status FROM simulacros_e WHERE simule_simul_id=? AND simule_alum_id=?");
+              $stmt = $conn->prepare("SELECT * FROM simulacros_e WHERE simule_simul_id=? AND simule_alum_id=?");
               $stmt->bind_param("ii", $id, $alum_idx2);
               $stmt->execute();
               $revision = $stmt->get_result();
               $revision2 = $revision->fetch_assoc();
-              $status_rev = $revision2['simule_status'];
+
+              $status_fecha = $revision2['simule_hora_final'];
+              $fecha_actual = date("m/d/Y h:i A");
+
             ?>
             <div class="card-footer">
                 <?php 
                 if ($nac_fec1 == $hoy) {
-                  if (!is_null($status_rev)) { 
-                    if ($status_rev == 1) { ?>
+
+                  if (!is_null($status_fecha)) { 
+
+                    if ($fecha_actual < $status_fecha) { ?>
                       <a class="btn btn-success" href="preifces-prueba.php?id_alum=<?php echo $alum_idx2 ?>&id_simul=<?php echo $info_guia['simul_id'] ?>" disabled>Continuar Prueba</a>
                     
                     <?php
-                    }  elseif ($status_rev == 3) { ?>
-                        
-                        <a class="btn btn-success" href="preifces-prueba.php?id_alum=<?php echo $alum_idx2 ?>&id_simul=<?php echo $info_guia['simul_id'] ?>" disabled>Continuar Prueba</a>
-                        
-                        
-                    <?php  
-                    }
+                    } 
+                    
                   } else { ?>
                     <a class="btn btn-success" href="preifces-prueba.php?id_alum=<?php echo $alum_idx2 ?>&id_simul=<?php echo $info_guia['simul_id'] ?>" disabled>Realizar Prueba</a>
                     
                   <?php
                   }
-                  
                   
                 } ?>
                   <a class="btn btn-warning" href="preifces-lista2.php?grado=<?php echo $_SESSION['alum_grado'] ?>">Volver</a>

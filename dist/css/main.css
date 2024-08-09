@@ -13,6 +13,7 @@ html {
   font-size: 1em;
   line-height: 1.4;
 }
+
 /*
  * Remove text-shadow in selection highlight:
  * https://twitter.com/miketaylr/status/12228805301
@@ -26,10 +27,12 @@ html {
   background: #b3d4fc;
   text-shadow: none;
 }
+
 ::selection {
   background: #b3d4fc;
   text-shadow: none;
 }
+
 /*
  * A better looking default horizontal rule
  */
@@ -41,6 +44,7 @@ hr {
   margin: 1em 0;
   padding: 0;
 }
+
 /*
  * Remove the gap between audio, canvas, iframes,
  * images, videos and the bottom of their containers:
@@ -54,6 +58,7 @@ svg,
 video {
   vertical-align: middle;
 }
+
 /*
  * Remove default fieldset styles.
  */
@@ -62,77 +67,144 @@ fieldset {
   margin: 0;
   padding: 0;
 }
+
 /*
  * Allow only vertical resizing of textareas.
  */
 textarea {
   resize: vertical;
 }
+
 /* ==========================================================================
   Author's custom styles
    ========================================================================== */
-  .mayusculas{
-    text-transform: uppercase;
-  }
-  .minusculas{
-      text-transform: lowercase;
-  }
-  .invalid-password {
-      display: none;
-      width: 100%;
-      margin-top: .25rem;
-      font-size: 80%;
-      color: #dc3545;
-  }
-  .valid-password {
-      display: none;
-      width: 100%;
-      margin-top: .25rem;
-      font-size: 80%;
-      color: #28a745;
-  }
-  .login-page .main-footer{
-      display: none;
+.mayusculas {
+  text-transform: uppercase;
 }
-  .btn-purple {
-    color: #fff;
-    background-color:purple!important;
-    border-color: purple!important;
-    box-shadow: none;
+
+.minusculas {
+  text-transform: lowercase;
+}
+
+.invalid-password {
+  display: none;
+  width: 100%;
+  margin-top: .25rem;
+  font-size: 80%;
+  color: #dc3545;
+}
+
+.valid-password {
+  display: none;
+  width: 100%;
+  margin-top: .25rem;
+  font-size: 80%;
+  color: #28a745;
+}
+
+.login-page .main-footer {
+  display: none;
+}
+
+.btn-purple {
+  color: #fff;
+  background-color: purple !important;
+  border-color: purple !important;
+  box-shadow: none;
+}
+
+.preloader {
+  width: 70px;
+  height: 70px;
+  border: 10px solid #eee;
+  border-top: 10px solid #666;
+  border-radius: 50%;
+  animation-name: girar;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.zoom {
+  transition: .3s ease;
+  -moz-transition: .3s ease;
+  /* Firefox */
+  -webkit-transition: .3s ease;
+  /* Chrome - Safari */
+  -o-transition: .5s ease;
+  /* Opera */
+}
+
+.zoom:hover {
+  transform: scale(2);
+  -moz-transform: scale(2);
+  /* Firefox */
+  -webkit-transform: scale(2);
+  /* Chrome - Safari */
+  -o-transform: scale(2);
+  /* Opera */
+  -ms-transform: scale(2);
+  /* IE9 */
+}
+
+@keyframes girar {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .preloader {
-    width: 70px;
-    height: 70px;
-    border: 10px solid #eee;
-    border-top: 10px solid #666;
-    border-radius: 50%;
-    animation-name: girar;
-    animation-duration: 2s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
+
+  to {
+    transform: rotate(360deg);
   }
-  .zoom{
-		transition: .3s ease;
- 		-moz-transition: .3s ease; /* Firefox */
- 		-webkit-transition: .3s ease; /* Chrome - Safari */
- 		-o-transition: .5s ease; /* Opera */
-	}
-	.zoom:hover{
-		transform : scale(2);
-		-moz-transform : scale(2); /* Firefox */
-		-webkit-transform : scale(2); /* Chrome - Safari */
-		-o-transform : scale(2); /* Opera */
-		-ms-transform : scale(2); /* IE9 */
-	}
-  @keyframes girar {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+}
+
+.spanDisabled {
+  background-color: #E9ECEF;
+}
+
+.divResIcfes__Container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.divResIcfes {
+  display: flex;
+  flex-direction: column;
+  width: 25px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px 0 0;
+}
+
+.divResIcfes__label {
+  margin: 0;
+}
+
+.divResIcfes__span {
+  width: 20px;
+  border-radius: 50%;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.divResIcfes__span--bg1 {
+  background-color: #28A745;
+}
+
+.divResIcfes__span--bg2 {
+  background-color: #BD2130;
+}
+
+.divResIcfes__span--bg3 {
+  background-color: #6C757D;
+}
+
 /* ==========================================================================
   Helper classes
    ========================================================================== */
@@ -143,6 +215,7 @@ textarea {
 [hidden] {
   display: none !important;
 }
+
 /*
  * Hide only visually, but have it available for screen readers:
  * https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
@@ -163,6 +236,7 @@ textarea {
   width: 1px;
   /* 1 */
 }
+
 /*
  * Extends the .sr-only class to allow the element
  * to be focusable when navigated to via the keyboard:
@@ -178,12 +252,14 @@ textarea {
   white-space: inherit;
   width: auto;
 }
+
 /*
  * Hide visually and from screen readers, but maintain layout
  */
 .invisible {
   visibility: hidden;
 }
+
 /*
  * Clearfix: contain floats
  *
@@ -200,9 +276,11 @@ textarea {
   content: " ";
   display: table;
 }
+
 .clearfix::after {
   clear: both;
 }
+
 /* ==========================================================================
    EXAMPLE Media Queries for Responsive Design.
    These examples override the primary ('mobile first') styles.
@@ -211,18 +289,21 @@ textarea {
 @media only screen and (min-width: 35em) {
   /* Style adjustments for viewports that meet the condition */
 }
+
 @media print,
-  (-webkit-min-device-pixel-ratio: 1.25),
-  (min-resolution: 1.25dppx),
-  (min-resolution: 120dpi) {
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 1.25dppx),
+(min-resolution: 120dpi) {
   /* Style adjustments for high resolution devices */
 }
+
 /* ==========================================================================
    Print styles.
    Inlined to avoid the additional HTTP request:
    https://www.phpied.com/delay-loading-your-print-css/
    ========================================================================== */
 @media print {
+
   *,
   *::before,
   *::after {
@@ -232,16 +313,20 @@ textarea {
     box-shadow: none !important;
     text-shadow: none !important;
   }
+
   a,
   a:visited {
     text-decoration: underline;
   }
+
   a[href]::after {
     content: " (" attr(href) ")";
   }
+
   abbr[title]::after {
     content: " (" attr(title) ")";
   }
+
   /*
    * Don't show links that are fragment identifiers,
    * or use the `javascript:` pseudo protocol
@@ -250,14 +335,17 @@ textarea {
   a[href^="javascript:"]::after {
     content: "";
   }
+
   pre {
     white-space: pre-wrap !important;
   }
+
   pre,
   blockquote {
     border: 1px solid #999;
     page-break-inside: avoid;
   }
+
   /*
    * Printing Tables:
    * https://web.archive.org/web/20180815150934/http://css-discuss.incutio.com/wiki/Printing_Tables
@@ -265,16 +353,19 @@ textarea {
   thead {
     display: table-header-group;
   }
+
   tr,
   img {
     page-break-inside: avoid;
   }
+
   p,
   h2,
   h3 {
     orphans: 3;
     widows: 3;
   }
+
   h2,
   h3 {
     page-break-after: avoid;

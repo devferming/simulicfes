@@ -19,7 +19,8 @@
     $revision = $stmt->get_result();
     $revision2 = $revision->fetch_assoc();
     $status_rev = $revision2['simule_status'];
-    if ($status_rev == 1) {
+
+    if ($status_rev == 1 || $status_rev == 2 || $status_rev == 3) {
       
       $stmt = $conn->prepare("SELECT simule_hora_final FROM simulacros_e WHERE simule_simul_id=? AND simule_alum_id=?");
       $stmt->bind_param("ii", $id_simul, $id);
@@ -29,36 +30,6 @@
      
       $nuevafecha = $rev_fecha2['simule_hora_final'];
   
-    } else if ($status_rev == 3) {
-        
-        echo "'<script>console.log('entro')</script>'";
-      try {
-        $stmt = $conn->prepare("SELECT simul_tiempo FROM simulacros WHERE simul_id=?");
-        $stmt->bind_param("i", $id_simul);
-        $stmt->execute();
-        $result_min = $stmt->get_result();
-        $result_min2 = $result_min->fetch_assoc();
-        $cod_min = $result_min2['simul_tiempo'];
-    
-        $hoy = date("Y-m-d H:i:s"); 
-        $minutos = $cod_min;
-        $nuevafecha = strtotime ( '+'.$minutos.' minute' , strtotime  ( $hoy ) ) ;
-        $nuevafecha = date ( 'm/d/Y h:i A' , $nuevafecha );
-        $status = 1;
-        $stmt = $conn->prepare("UPDATE simulacros_e SET simule_hora_final=?, simule_status=?, simule_editado=NOW() WHERE simule_simul_id=? AND simule_alum_id=?");
-        $stmt->bind_param("siii", $nuevafecha, $status, $id_simul, $id );
-        $stmt->execute();
-    
-        $id_registro = $stmt->affected_rows;
-        if($id_registro > 0){
-          
-        } else {
-          die("ERROR!");
-        };
-    
-      } catch (Exception $e) {
-        echo "Error:" . $e->getMessage();
-      } 
     } else {
       try {
         $stmt = $conn->prepare("SELECT simul_tiempo FROM simulacros WHERE simul_id=?");
@@ -90,6 +61,8 @@
         echo "Error:" . $e->getMessage();
       } 
     };
+
+
   try {
     $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_id=?");
     $stmt->bind_param("i", $id_simul);

@@ -1,6 +1,5 @@
 //$(document).ready(function () {
 $(function() {
-  console.log('click2')
   /*Mascaras de entrada para campos de formulario*/
   $(".bloquear").on("paste", function (e) {
     e.preventDefault();
@@ -125,7 +124,7 @@ $(function() {
     );
   });
   /*Asignador de nivel de acceso según el Rol*/
-  $("#user_rol").on("click ", function (event) {
+  $("#user_rol").on("change ", function (event) {
     var rol = $(this).val();
     if (rol == "RECTOR(A)") {
       $("#nivel").attr("value", 1);

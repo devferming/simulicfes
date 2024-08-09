@@ -5,19 +5,19 @@
   include_once 'templates/header.php';
   include_once 'templates/barra.php';
   include_once 'templates/navegacion.php';
-  $grado = $_GET['grado'];
+  $id_grado = $_GET['grado'];
   //$materia = $_GET['materia'];
   //$periodo = $_GET['periodo'];
-  if (!filter_var($grado, FILTER_VALIDATE_INT)) {
+  if (!filter_var($id_grado, FILTER_VALIDATE_INT)) {
     die("ERROR!");
   };
   try {
-    $stmt = $conn->prepare("SELECT gdo_cod_grado FROM grados WHERE gdo_des_grado=?");
-    $stmt->bind_param("s", $grado);
+    $stmt = $conn->prepare("SELECT * FROM grados WHERE gdo_id=?");
+    $stmt->bind_param("i", $id_grado);
     $stmt->execute();
-    $resultado2 = $stmt->get_result();
-    $gcode2 = $resultado2->fetch_assoc();
-    $gcode = $gcode2['gdo_cod_grado'];
+    $resultado = $stmt->get_result();
+    $ginfo = $resultado->fetch_assoc();
+    $gdesc = $ginfo['gdo_des_grado'];
   } catch (\Exception $e) {
       $error = $e->getMessage();
       echo $error;
@@ -34,7 +34,7 @@
               <i class="fa fa-user-plus"></i>
               Nuevo Simulacro
             </h1>
-            <h5>Grado: <code><?php echo $grado ?></code></h5>
+            <h5>Grado: <code><?php echo $gdesc ?></code></h5>
           </div><!-- /.col -->
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -503,9 +503,9 @@
           <!-- /.card-body -->
           <div class="card-footer">
             <input type="hidden" name="simul-comando" id="simul-comando" value="nuevo">
-            <input type="hidden" name="simul-grado" id="simul-grado" value="<?php echo $grado ?>">
-            <button type="submit" class="btn btn-success">Cargar</button>
-            <button type="button" class="btn btn-warning" onclick="volverListaAsig('<?php echo $grado; ?>');">Pruebas Cargadas</button>
+            <input type="hidden" name="simul-grado" id="simul-grado" value="<?php echo $id_grado ?>">
+            <button type="submit" class="btn btn-success">Cargar Simulacro</button>
+            <button type="button" class="btn btn-warning" onclick="volverListaAsig('<?php echo $id_grado; ?>');">Simulacros cargados</button>
           </div>
         </div>
         <!-- /.card -->

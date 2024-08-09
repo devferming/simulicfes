@@ -32,12 +32,12 @@
       echo $error;
   }
   try {
-    $stmt = $conn->prepare("SELECT gdo_cod_grado FROM grados WHERE gdo_des_grado=?");
+    $stmt = $conn->prepare("SELECT * FROM grados WHERE gdo_des_grado=?");
     $stmt->bind_param("s", $info_guia['simul_grado']);
     $stmt->execute();
     $resultado2 = $stmt->get_result();
     $gcode2 = $resultado2->fetch_assoc();
-    $gcode = $gcode2['gdo_cod_grado'];
+    $gcode = $gcode2['gdo_id'];
   } catch (\Exception $e) {
       $error = $e->getMessage();
       echo $error;

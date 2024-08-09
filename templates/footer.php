@@ -16,7 +16,7 @@
       <div class="modal-body">
         <form role="form" name="logins_actualizar" id="logins_actualizar" method="post" action="usuario-modelo.php" class="needs-validation" novalidate autocomplete="on">
           <div class="row">
-            
+
             <div class="col-sm-6">
               <div class="form-group">
                 <label>Nombre</label>
@@ -28,6 +28,7 @@
                 </div>
               </div>
             </div> <!-- col -->
+
             <div class="col-sm-6">
               <div class="form-group">
                 <label>Nickname</label>
@@ -39,6 +40,7 @@
                 </div>
               </div>
             </div> <!-- col -->
+
             <div class="col-sm-6">
               <div class="form-group">
                 <label>Password</label>
@@ -47,12 +49,13 @@
                     <span class="input-group-text"><i class="fas fa-keyboard"></i></span>
                   </div>
                   <input type="password" class="form-control password bloquear" name="user_password_l" id="password" required>
-                  <div id="resultado-password-contenedor2" style ="display:none">
-                  <span id="resultado-password2">Este campo es obligatorio.</span> 
+                  <div id="resultado-password-contenedor2" style="display:none">
+                    <span id="resultado-password2">Este campo es obligatorio.</span>
                   </div>
                 </div>
               </div>
             </div> <!-- col -->
+
             <div class="col-sm-6">
               <div class="form-group">
                 <label>Confirmar Password</label>
@@ -61,21 +64,21 @@
                     <span class="input-group-text"><i class="fas fa-keyboard"></i></span>
                   </div>
                   <input type="password" class="form-control password bloquear" name="user_password2" id="repetir-password" required>
-                  <div id="resultado-password-contenedor" style ="display:none">
-                  <span id="resultado-password">Este campo es obligatorio.</span> 
+                  <div id="resultado-password-contenedor" style="display:none">
+                    <span id="resultado-password">Este campo es obligatorio.</span>
                   </div>
                 </div>
               </div>
             </div> <!-- col -->
+
           </div>
           <!-- /.row -->
-          </div>
-          <div class="modal-footer justify-content-between">
-            <input type="hidden" name="id_login_l" id="id_login_l" value="">
-            <input type="hidden" name="user" value="login_act">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-            <button type="submit" class="btn btn-success" id="reg-user">Actualizar</button>
-          </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <input type="hidden" name="id_login_l" id="id_login_l" value="">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-success" id="reg-user" onclick="actualizar()">Actualizar</button>
+      </div>
       </form>
     </div>
     <!-- /.modal-content -->
@@ -84,7 +87,7 @@
 </div>
 <!-- /.modal -->
 <div class="swal2-container swal2-center swal2-backdrop-show cortina" style="overflow-y: auto; display:none;" id="cortina-de-espera">
-<div class="preloader"></div>
+  <div class="preloader"></div>
 </div>
 <!-- Control Sidebar -->
 <aside class="control-sidebar control-sidebar-dark">
@@ -97,7 +100,9 @@
 <script src="dist/js/plugins.js"></script>
 <script src="plugins/jquery/jquery.min.js"></script>
 <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
-<script>$.widget.bridge('uibutton', $.ui.button)</script>
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
 <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="plugins/moment/moment.min.js"></script>
 <script src="plugins/inputmask/min/jquery.inputmask.bundle.min.js"></script>
@@ -111,25 +116,35 @@
 <script src="plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
 <script src="plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 <script src="plugins/sweetalert2/sweetalert2.all.min.js"></script>
+
 <script src="plugins/datatables/jquery.dataTables.min.js"></script>
 <script src="plugins/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="plugins/datatables/dataTables.responsive.min.js"></script>
 <script src="plugins/datatables/responsive.bootstrap4.min.js"></script>
 <script src="plugins/datatables/dataTables.buttons.min.js"></script>
 <script src="plugins/datatables/buttons.bootstrap4.min.js"></script>
+
 <script src="plugins/jszip/jszip.min.js"></script>
 <script src="plugins/pdfmake/pdfmake.min.js"></script>
 <script src="plugins/pdfmake/vfs_fonts.js"></script>
+
 <script src="plugins/datatables/buttons.html5.min.js"></script>
 <script src="plugins/datatables/buttons.print.min.js"></script>
 <script src="plugins/datatables/buttons.colVis.min.js"></script>
+
 <script src="plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
 <!-- Custom's -->
 <script src="dist/js/custom/apps-control.js"></script>
 <script src="dist/js/custom/form-control.js"></script>
 <script src="dist/js/custom/login-control.js"></script>
+
+<?php $current_file = basename($_SERVER['PHP_SELF']); ?>
+<?php if ($current_file === 'preifces-entregas.php' || $current_file === 'preifces-entregas2.php') { ?>
+echo '<script src="dist/js/custom/icfesTableGrado.js"></script>';
+<?php } ?>
+
 <script>
-  $(function () {
+  $(function() {
     //Initialize Select2 Elements
     $('.select2').select2()
     //Initialize Select2 Elements
@@ -137,9 +152,11 @@
       theme: 'bootstrap4'
     })
     //Datemask dd/mm/yyyy
-    $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
+    $('#datemask').inputmask('dd/mm/yyyy', {
+      'placeholder': 'dd/mm/yyyy'
+    })
     //Datemask2 mm/dd/yyyy
-   // $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
+    // $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
     //Money Euro
     $('[data-mask]').inputmask()
     //Date range picker
@@ -153,20 +170,19 @@
       }
     })
     //Date range as a button
-    $('#daterange-btn').daterangepicker(
-      {
-        ranges   : {
-          'Today'       : [moment(), moment()],
-          'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-          'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
+    $('#daterange-btn').daterangepicker({
+        ranges: {
+          'Today': [moment(), moment()],
+          'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-          'This Month'  : [moment().startOf('month'), moment().endOf('month')],
-          'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+          'This Month': [moment().startOf('month'), moment().endOf('month')],
+          'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         },
         startDate: moment().subtract(29, 'days'),
-        endDate  : moment()
+        endDate: moment()
       },
-      function (start, end) {
+      function(start, end) {
         $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
       }
     )
@@ -179,10 +195,11 @@
     $('.my-colorpicker2').on('colorpickerChange', function(event) {
       $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
     });
-    $("input[data-bootstrap-switch]").each(function(){
+    $("input[data-bootstrap-switch]").each(function() {
       $(this).bootstrapSwitch('state', $(this).prop('checked'));
     });
   })
+
   function desplegar(v) {
     var id_login = v;
     datos = {
@@ -194,7 +211,7 @@
       url: "usuario-modelo.php",
       type: "post",
       dataType: "json",
-      success: function (data) {
+      success: function(data) {
         var resultado = data;
         $("#user_nombre_l").val(resultado.nombre);
         $("#user_nick_l").val(resultado.nickname);
@@ -203,6 +220,57 @@
       },
     });
   }
+
+  function actualizar() {
+
+    let lide = $("#id_login_l").val();
+    let nick = $("#user_nick_l").val();
+    let pass = $("#password").val();
+
+    datos = {
+      user: 'login_act',
+      id_login_l: lide,
+      user_nick_l: nick,
+      user_password_l: pass,
+    };
+
+    $.ajax({
+      data: datos,
+      url: "usuario-modelo.php",
+      type: "post",
+      dataType: "json",
+      success: function(data) {
+        const resultado = data;
+        if (resultado.respuesta == "exito") {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Datos actualizados correctamente",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          $("#modal-login-lista").modal("hide");
+          $("#user_nick_l").val('');
+          $("#password").val('').removeClass("is-valid");
+          $("#repetir-password").val('').removeClass("is-valid");
+          $("#resultado-password").text("")
+          $("#resultado-password-contenedor")
+            .removeClass("valid-password")
+            .attr("style", " ")
+
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Algo salió mal",
+            showConfirmButton: true,
+          });
+        }
+      },
+    });
+
+  }
 </script>
 </body>
+
 </html>

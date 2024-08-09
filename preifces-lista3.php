@@ -39,7 +39,7 @@
     echo $error;
   }
   try {
-    $stmt = $conn->prepare("SELECT gdo_des_grado FROM grados WHERE gdo_cod_grado=?");
+    $stmt = $conn->prepare("SELECT gdo_des_grado FROM grados WHERE gdo_id=?");
     $stmt->bind_param("i", $grado);
     $stmt->execute();
     $resultado = $stmt->get_result();

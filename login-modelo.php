@@ -36,12 +36,14 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
                     $resultado2 = $stmt->get_result();
                     $datos = $resultado2->fetch_assoc();
                     $alum_grado = $datos['alum_grado'];
-                    $stmt = $conn->prepare("SELECT gdo_cod_grado FROM grados WHERE gdo_des_grado=?");
+
+                    $stmt = $conn->prepare("SELECT * FROM grados WHERE gdo_des_grado=?");
                     $stmt->bind_param("s", $alum_grado);
                     $stmt->execute();
                     $resultado3 = $stmt->get_result();
                     $datos2 = $resultado3->fetch_assoc();
-                    $alum_grad_code = $datos2['gdo_cod_grado'];
+                    $alum_grad_code = $datos2['gdo_id'];
+
                   } else {
                     
                     $stmt = $conn->prepare("SELECT * FROM usuarios WHERE users_id_logins=?");
@@ -50,22 +52,14 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
                     $resultado2 = $stmt->get_result();
                     $datos = $resultado2->fetch_assoc();
                     $users_mat = $datos['users_asignatura'];
-                    $users_dgp = $datos['users_dgrupo'];
-                    $users_dgs = $datos['users_dgrupo_seccion'];
-                    $users_pj = $datos['users_pj'];
-                    $users_j = $datos['users_j'];
-                    $users_t = $datos['users_t'];
-                    $users_1ro = $datos['users_1ro'];
-                    $users_2do = $datos['users_2do'];
-                    $users_3ro = $datos['users_3ro'];
-                    $users_4to = $datos['users_4to'];
-                    $users_5to = $datos['users_5to'];
-                    $users_6to = $datos['users_6to'];
-                    $users_7mo = $datos['users_7mo'];
-                    $users_8vo = $datos['users_8vo'];
-                    $users_9no = $datos['users_9no'];
-                    $users_10mo = $datos['users_10mo'];
-                    $users_11mo = $datos['users_11mo'];
+                    $users_grados = $datos['users_grados'];
+
+                    if ($datos['users_grados'] != 'N/A') {
+                      $g_arr = json_decode($datos['users_grados'], true);
+                    } else {
+                      $g_arr = array();
+                    }
+
                     $stmt = $conn->prepare("SELECT mat_cod_materia FROM materias WHERE mat_des_materia=?");
                     $stmt->bind_param("s", $users_mat);
                     $stmt->execute();
@@ -98,23 +92,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST")
                       $_SESSION['id'] = $user_id;
                       $_SESSION['users_mat'] = $users_mat;
                       $_SESSION['users_mat_code'] = $users_mat_code;
-                      $_SESSION['dgrupo'] = $users_dgp;
-                      $_SESSION['dgrupos'] = $users_dgs;
-                      $_SESSION['users_pj'] = $users_pj;
-                      $_SESSION['users_j'] = $users_j;
-                      $_SESSION['users_t'] = $users_t;
-                      $_SESSION['users_1ro'] = $users_1ro;
-                      $_SESSION['users_2do'] = $users_2do;
-                      $_SESSION['users_3ro'] = $users_3ro;
-                      $_SESSION['users_4to'] = $users_4to;
-                      $_SESSION['users_5to'] = $users_5to;
-                      $_SESSION['users_6to'] = $users_6to;
-                      $_SESSION['users_7mo'] = $users_7mo;
-                      $_SESSION['users_8vo'] = $users_8vo;
-                      $_SESSION['users_9no'] = $users_9no;
-                      $_SESSION['users_10mo'] = $users_10mo;
-                      $_SESSION['users_11mo'] = $users_11mo;
-                      
+                      $_SESSION['users_grados'] = $g_arr;
                     }
       
                     $respuesta = array(

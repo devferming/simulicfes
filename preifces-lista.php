@@ -10,7 +10,7 @@
     die("ERROR!");
   };
   try {
-    $stmt = $conn->prepare("SELECT gdo_des_grado FROM grados WHERE gdo_cod_grado=?");
+    $stmt = $conn->prepare("SELECT gdo_des_grado FROM grados WHERE gdo_id=?");
     $stmt->bind_param("i", $grado);
     $stmt->execute();
     $resultado = $stmt->get_result();
@@ -94,9 +94,9 @@
                     </button>
                     <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(68px, 38px, 0px); top: 0px; left: 0px; will-change: transform;">
                         <a class="dropdown-item" href="preifces-param4.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Actualizar</a>
+                        <a class="dropdown-item" href="preifces-revision.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Revisión</a>
                         <a class="dropdown-item" href="preifces-entregas.php?simul_id=<?php echo $existe['simul_id'] ?>&grado=<?php echo $grado ?>">Resultados</a>
                         <a class="dropdown-item" href="#">Analizar(En Desarrollo)</a>
-                      
                     </div>
                   </div>
                 </td>
@@ -166,42 +166,6 @@
                       </div>
                     </div>
                   </div>
-<!--
-                  <div class="card card-success">
-                    <div class="card-header">
-                      <h4 class="card-title w-100">
-                        <a class="d-block w-100" data-toggle="collapse" href="#collapse3">
-                        <span><i class="fas fa-cog"></i> Aprobados <strong>(8)</strong></span>
-                        </a>
-                      </h4>
-                    </div>
-                    <div id="collapse3" class="collapse" data-parent="#accordion">
-                      <div class="card-body">
-                        <p>Fermin Gutiérrez Salas</p>
-                        <p>Yulianis Palencia Pérez</p>
-                        <p>María Magdalena</p>
-                        <p>Simón Bolívar</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card card-danger">
-                    <div class="card-header">
-                      <h4 class="card-title w-100">
-                        <a class="d-block w-100" data-toggle="collapse" href="#collapse4">
-                        <span><i class="fas fa-cog"></i> Reprobados <strong>(2)</strong></span>
-                        </a>
-                      </h4>
-                    </div>
-                    <div id="collapse4" class="collapse" data-parent="#accordion">
-                      <div class="card-body">
-                        <p>Fermin Gutiérrez Salas</p>
-                        <p>Yulianis Palencia Pérez</p>
-                        <p>María Magdalena</p>
-                        <p>Simón Bolívar</p>
-                      </div>
-                    </div>
-                  </div>
--->
                 </div>
               </div>
               <!-- /.card-body -->
@@ -222,7 +186,6 @@
 <script>
   function desplegarMetricas(id) {
     var id_taller = id;
-    console.log(id_taller);
     datos = {
       avasig: 'consultar',
       id_guia: id_taller
