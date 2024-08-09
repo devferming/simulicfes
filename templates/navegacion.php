@@ -5,7 +5,6 @@
     <img src="dist/img/cpi_logo.png" alt="Sistema CPI Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
     <span class="brand-text font-weight-light">SIMULICFES</span>
   </a>
-  <?php include_once 'funciones/enigma.php'; ?>
   <!-- Sidebar -->
   <div class="sidebar">
     <!-- Sidebar user panel (optional) -->
