@@ -6,6 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   //$fech1 = date($fecha_nac);
   $fech2 = date('Y-m-d');
   $anio_actual = date("Y");
+  
   //::::::::REGISTRAR ALUMNO::::::::://
   if ($_POST['cmd'] == 'anuevo') {
     $ide_tip = htmlspecialchars($_POST['ide_tip'], ENT_QUOTES, 'UTF-8');

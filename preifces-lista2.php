@@ -126,11 +126,11 @@ if ($_SESSION['nivel'] == 4) :
                     </td>
                     <td>
                       <?php
-                      $nac_fec1 = $datos_guia['simul_fecha'];
-                      $nac_fec = DateTime::createFromFormat('Y-m-d', $nac_fec1)->format('d-m-Y');
+                      $nac_fec = DateTime::createFromFormat('Y-m-d', $datos_guia['simul_fecha']);
+                      $fecha_actual_dt = DateTime::createFromFormat('Y-m-d', date("Y-m-d"));
                       ?>
 
-                      <p><?php echo $nac_fec; ?></p>
+                      <p><?php echo $nac_fec->format('d-m-Y') ?></p>
                     </td>
                     <td>
                       <div class="btn-group" md5>
@@ -140,17 +140,11 @@ if ($_SESSION['nivel'] == 4) :
                         <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(68px, 38px, 0px); top: 0px; left: 0px; will-change: transform;">
                           <a class="dropdown-item" href="preifces-param2.php?id=<?php echo   $datos_guia['simul_id'] ?>">Explorar</a>
 
-                          <?php
-                          $hoy = date("Y-m-d");
-
-                          $fecha_actual = strtotime(date("d-m-Y"));
-                          $fecha_entrada = strtotime($nac_fec);
-                          if ($fecha_actual > $fecha_entrada) { ?>
+                          <?php if ($fecha_actual_dt > $nac_fec) { ?>
                             <a class="dropdown-item" href="preifces-entregas2.php?simul_id=<?php echo $datos_guia['simul_id'] ?>&id=<?php echo $alum_idx2 ?>&grado=<?php echo $grado ?>">Resultados</a>
-                          <?php
-                          }
-                          ?>
-                          <!--<a class="dropdown-item" href="#">Analizar</a>-->
+
+                            <a class="dropdown-item" href="preifces-analisis2.php?simul_id=<?php echo $datos_guia['simul_id'] ?>&id=<?php echo $alum_idx2 ?>&grado=<?php echo $grado ?>"">Analizar</a>
+                          <?php } ?>
                         </div>
                       </div>
                     </td>

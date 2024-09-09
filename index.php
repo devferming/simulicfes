@@ -5,7 +5,249 @@ if ($_SESSION['nivel'] == 1 || $_SESSION['nivel'] == 2 || $_SESSION['nivel'] == 
   include_once 'templates/header.php';
   include_once 'templates/barra.php';
   include_once 'templates/navegacion.php';
+
+
+  function ordenarMateriasDescendente($arrayMaterias)
+  {
+    foreach ($arrayMaterias as $materia => $resultados) {
+      arsort($arrayMaterias[$materia]);
+    }
+    return $arrayMaterias;
+  }
+
+  $gran_array = array();
+  $podium_general = array();
+
+  ///////// /* ESTABLECE SI EL INFORME ES GENERAL O POR MATERIA (GENERAL PARA COORD. Y POR MATERIA PARA DOCENTES) /////////
+
+  $crr_mat = $_SESSION['users_mat'];
+
+  $materias = array(
+    'INGLÉS' => array('Inglés', 'simulr_ingles', 'simul_materia_ingles', 'ingles_p1', 'ingles_p2', 'ingles'),
+    'CIENCIAS NATURALES' => array('Naturales', 'simulr_naturales', 'simul_materia_naturales', 'naturales_p1', 'naturales_p2', 'naturales'),
+    'LENGUAJE' => array('Lenguaje', 'simulr_lenguaje', 'simul_materia_lenguaje', 'lenguaje_p1', 'lenguaje_p2', 'lenguaje'),
+    'MATEMÁTICAS' => array('Matemáticas', 'simulr_matematicas', 'simul_materia_matematicas', 'matematicas_p1', 'matematicas_p2', 'matematicas'),
+    'CIENCIAS SOCIALES' => array('Sociales', 'simulr_sociales', 'simul_materia_sociales', 'sociales_p1', 'sociales_p2', 'sociales'),
+    'FILOSOFÍA' => array('Filosofía', 'simulr_filosofia', 'simul_materia_filosofia', 'filosofia_p1', 'filosofia_p2', 'filosofia'),
+    'FÍSICA' => array('Física', 'simulr_fisica', 'simul_materia_fisica', 'fisica_p1', 'fisica_p2', 'fisica')
+  );
+
+  $car_tittle1 = '';
+
+  if (isset($materias[$crr_mat])) {
+    $arrMateria = array(
+      $materias[$crr_mat][0] => array_slice($materias[$crr_mat], 1)
+    );
+    $car_tittle1 = $crr_mat;
+  } else {
+    $arrMateria = array_map(function ($materia) {
+      return array_slice($materia, 1);
+    }, $materias);
+    $car_tittle1 = 'General';
+  }
+  ///////// ESTABLECE SI EL INFORME ES GENERAL O POR MATERIA (GENERAL PARA COORD. Y POR MATERIA PARA DOCENTES) */ /////////
+
+
+  ///////// /* RECOPILACION DE DATOS ESTUDIANTES /////////
+  $data_studiantes = array();
+
+  try {
+    $stmt = $conn->prepare("SELECT * FROM alumnos");
+    $stmt->execute();
+    $info_alum2 = $stmt->get_result();
+  } catch (\Exception $e) {
+    $error = $e->getMessage();
+    echo $error;
+  }
+
+  while ($info_alum = $info_alum2->fetch_assoc()) {
+    $data_studiantes[$info_alum['alum_id']] = $info_alum;
+  }
+  ///////// RECOPILACION DE DATOS ESTUDIANTES */ /////////
+
+
+  ///////// /* WHILE PRINCIPAL /////////
+  try {
+    $stmt = $conn->prepare("SELECT * FROM simulacros");
+    $stmt->execute();
+    $resultado_simulacro = $stmt->get_result();
+  } catch (\Exception $e) {
+    $error = $e->getMessage();
+    echo $error;
+  }
+
+  while ($info_simulacro = $resultado_simulacro->fetch_assoc()) {
+    $crr_simid = $info_simulacro['simul_id'];
+    $crr_grado = $info_simulacro['simul_grado'];
+
+    
+    ///////// /* RECOPILACION RESPUESTAS DE LOS ESTUDIANTES /////////
+    try {
+      $stmt = $conn->prepare("SELECT * FROM simulacros");
+      $stmt->execute();
+      $max_simul_grado1 = $stmt->get_result();
+      $max_simul_grado = 0;
+      while ($max_simul_grado2 = $max_simul_grado1->fetch_assoc()) {
+        $max_simul_grado2['simul_grado'] === $crr_grado ? $max_simul_grado++ : '';
+      }      
+      
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+      echo $error;
+    }
+    ///////// /* RECOPILACION RESPUESTAS DE LOS ESTUDIANTES /////////
+
+
+    ///////// /* RECOPILACION RESPUESTAS DE LOS ESTUDIANTES /////////
+    $data_simulacrose = array();
+
+    $stmt = $conn->prepare("SELECT * FROM simulacros_e WHERE simule_simul_id=?");
+    $stmt->bind_param("i", $crr_simid);
+    $stmt->execute();
+    $info_simul2 = $stmt->get_result();
+
+    while ($crr_info_simul = $info_simul2->fetch_assoc()) {
+      $data_simulacrose[$crr_info_simul['simule_alum_id']] = $crr_info_simul['simule_respuestas'];
+    }
+
+    ///////// RECOPILACION RESPUESTAS DE LOS ESTUDIANTES */ /////////
+
+
+    ///////// /* RECOPILACION DE REVISIONES DE SIMULACROS /////////
+    $data_simulacrosr = array();
+
+    try {
+      $stmt = $conn->prepare("SELECT * FROM simulacros_r WHERE simulr_simul_id=?");
+      $stmt->bind_param("i", $crr_simid);
+      $stmt->execute();
+      $resultado = $stmt->get_result();
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+      echo $error;
+    }
+
+    while ($info_guia = $resultado->fetch_assoc()) {
+      $data_simulacrosr[$crr_simid] = $info_guia;
+    }
+
+    ///////// RECOPILACION DE REVISIONES DE SIMULACROS */ /////////
+
+    ///////// INICIA LA ESTADISTICA POR SIMULACRO /////////
+
+    $puntajes_maximos = array();
+    $puntajes_materias = array();
+    $info_preguntas = array();
+    $promedio_materias = array();
+    $preguntas_resultados = array();
+
+    foreach ($data_simulacrose as $ide_alum => $res_alum) {
+
+      $nombre_estudiante = $data_studiantes[$ide_alum]['alum_1er_apellido'] . ' ' . $data_studiantes[$ide_alum]['alum_1er_nombre'];
+      $grado_estudiante = $data_studiantes[$ide_alum]['alum_grado'];
+      $respuestas_alum = json_decode($res_alum, true);
+
+      if ($respuestas_alum) {
+
+        $total_correctas = 0;
+        $total_incorrectas = 0;
+        $puntaje_global = 0;
+        $puntaje_max = 0;
+        $crr_mats = array();
+        $crr_mats2 = array();
+
+        foreach ($arrMateria as $key => $value) {
+
+          $simul_param = json_decode($info_simulacro[$value[1]], true);
+          $simul_p1 = (int) $simul_param[$value[2]];
+          $simul_p2 = (int) $simul_param[$value[3]];
+          $correctas = 0;
+          $incorrectas = 0;
+
+          $si_ingles = json_decode($data_simulacrosr[$crr_simid][$value[0]], true);
+
+          if ($simul_param[$value[4] . '_status'] === 'SI') {
+
+            $crr_mats[$key] = $value[4];
+            $control = $simul_p1;
+
+            for ($i = $simul_p1; $i <= $simul_p2; $i++) {
+              $respuesta_profesor = $si_ingles["" . 'p-' . $control . ""];
+              $respuesta_alumno = $respuestas_alum["" . 'p-' . $control . ""];
+
+              if ($respuesta_profesor === $respuesta_alumno) {
+                $correctas += 1;
+                $total_correctas += 1;
+                $info_preguntas[$value[4]]["" . 'p-' . $control . ""] += 1;
+                $preguntas_resultados[$value[4]]["" . 'p-' . $control . ""]['buenas'] += 1;
+              } else {
+                $incorrectas += 1;
+                $total_incorrectas += 1;
+                $preguntas_resultados[$value[4]]["" . 'p-' . $control . ""]['malas'] +=  1;
+              }
+
+              if (!isset($info_preguntas[$value[4]]["" . 'p-' . $control . ""])) {
+                $info_preguntas[$value[4]]["" . 'p-' . $control . ""] = 0;
+              }
+              $control += 1;
+            }
+
+            $total_preguntas = $correctas + $incorrectas;
+            $puntaje2 = $correctas * 100 / $total_preguntas;
+            $puntaje = number_format($puntaje2, 2);
+
+            $puntaje_global += $puntaje;
+            $puntajes_materias[$ide_alum][$value[4]] = $puntaje;
+            $puntajes_materias[$ide_alum]['nombre'] = $nombre_alum;
+            $promedio_materias[$value[4]] += $puntaje;
+
+            $gran_array[$crr_grado]['promedio_materias'][$value[4]]['puntaje'] += $puntaje;
+            $puntaje_max += 100;
+          }
+        }
+
+        $total_preguntas_final = $total_correctas + $total_incorrectas;
+        $puntajes_maximos[$ide_alum] = ($puntaje_global / $max_simul_grado);
+      } 
+
+    }
+
+    $podium_preguntas = ordenarMateriasDescendente($info_preguntas);
+    $podium_preguntasJS = json_encode($podium_preguntas);
+    $materias_max = count($promedio_materias) * 100;
+
+    $keys = array_keys($puntajes_maximos);
+    $values = array_values($puntajes_maximos);
+    array_multisort($values, SORT_DESC, $keys, $values);
+    $podium = array_combine($keys, $values);
+
+    $gran_array[$crr_grado][$crr_simid]['podium_preguntas'] = $podium_preguntas;
+    $gran_array[$crr_grado][$crr_simid]['podium_preguntasJS'] = $podium_preguntasJS;
+    $gran_array[$crr_grado][$crr_simid]['podium'] = $podium;
+
+    $data_simulacrose = array();
+    $data_simulacrosr = array();
+  }
+  ///////// WHILE PRINCIPAL */ /////////
+
+  foreach ($gran_array as $grado => $grado_dat) {
+
+    $simul_por_grado = count($gran_array[$grado]);
+
+    foreach ($grado_dat as $simul_id => $simul_dat) {
+      foreach ($simul_dat['podium'] as $estudiante_id => $estudiante_puntaje) {
+        $puntaje_insert = $estudiante_puntaje; // $simul_por_grado;
+        $podium_general[$grado][$estudiante_id] += $puntaje_insert;
+        $podium_general['GENERAL'][$estudiante_id] += $puntaje_insert;
+      }
+    }
+  }
+
+
+
 ?>
+
+  <script>
+  </script>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -36,622 +278,185 @@ if ($_SESSION['nivel'] == 1 || $_SESSION['nivel'] == 2 || $_SESSION['nivel'] == 
     <!-- /.content-header -->
     <!-- Main content -->
     <section class="content">
-      <?php if ($_SESSION['nivel'] !== 4) : ?>
-        <div class="container-fluid">
-          <div class="row">
 
-            <div class="col-lg-3 col-6">
+      <div class="col-md-12">
+        <div class="card card-outline card-success">
+          <div class="card-header">
+            <h3 class="card-title"><?php echo 'Mejores puntajes - ' . $car_tittle1 ?></h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body row">
+
+
+            <?php $general_tres = array(); ?>
+            <?php $general_trres = array(); ?>
+            <?php $init_g3 = 1; ?>
+            <?php $init_gr = 6; ?>
+
+            
+
+            <?php foreach ($podium_general as $grado => $listado) { ?>
+
               <?php
-              $sql = "SELECT COUNT(simul_id) AS cargados FROM simulacros";
-              $res = $conn->query($sql);
-              $dat = $res->fetch_assoc();
+              $list_keys = array_keys($listado);
+              $list_values = array_values($listado);
+              array_multisort($list_values, SORT_DESC, $list_keys, $list_values);
+              $list_sort = array_combine($list_keys, $list_values);
+
+              $top_tres = array_slice($list_sort, 0, 5, true);
+              $top_rest = array_slice($list_sort, 5, null, true);
+
+              if ($grado === 'GENERAL') {
+                $general_tres = $top_tres;
+                $general_trres = $top_rest;
+              }
+
               ?>
 
-              <div class="small-box bg-success">
-                <div class="inner">
-                  <h3><?php echo $dat['cargados']; ?></h3>
-                  <p>Simulacros cargados</p>
-                </div>
-                <div class="icon">
-                  <i class="fas fa-book"></i>
-                </div>
-              </div>
-            </div>
+              <?php if ($grado != 'GENERAL') : ?>
 
-            <div class="col-lg-3 col-6">
-              <?php
-              $sql = "SELECT COUNT(alum_id ) AS totalAlumnos FROM alumnos";
-              $res = $conn->query($sql);
-              $dat = $res->fetch_assoc();
-              ?>
-              <div class="small-box bg-info">
-                <div class="inner">
-                  <h3><?php echo $dat['totalAlumnos']; ?></h3>
-                  <p>Alumnos Matriculados</p>
-                </div>
-                <div class="icon">
-                  <i class="fas fa-users"></i>
-                </div>
-                <!--<a href="#" class="small-box-footer">
-                  Más información <i class="fas fa-arrow-circle-right"></i>
-                </a>-->
-              </div>
-            </div>
+                <div class="col-md-3">
 
-            <div class="col-lg-3 col-6">
-              <div class="small-box bg-danger">
-                <div class="inner">
-                  <h3>123</h3>
-                  <p>Alumnos Privados</p>
-                </div>
-                <div class="icon">
-                  <i class="fas fa-user-check"></i>
-                </div>
-              </div>
-            </div>
+                  <div class="card card-widget widget-user-2 shadow-sm" style="margin-bottom: 0">
 
-            <div class="col-lg-3 col-6">
-              <?php
-              $sql4 = "SELECT COUNT(users_id) AS docentes FROM usuarios WHERE users_rol = 'DOCENTE'";
-              $resultado4 = $conn->query($sql4);
-              $matriculados4 = $resultado4->fetch_assoc();
-              ?>
-              <div class="small-box bg-warning">
-                <div class="inner">
-                  <h3><?php echo $matriculados4['docentes']; ?></h3>
-                  <p>Docentes Registrados</p>
+                    <div class="widget-user-header bg-secondary">
+                      <h2 class="widget-user-desc" style="margin:0; font-size:0.9rem"><?php echo $grado ?> </h2>
+                    </div>
+                    <div class="card-footer p-0">
+                      <ul class="nav flex-column">
+
+                        <?php $init_t3 = 1; ?>
+                        <?php $init_tr = 6; ?>
+
+                        <?php foreach ($top_tres as $crr_id => $puntos) { ?>
+                          <?php $crr_name = $data_studiantes[$crr_id]['alum_1er_apellido'] . ' ' . $data_studiantes[$crr_id]['alum_1er_nombre'] ?>
+                          <li class="nav-item">
+                            <p style="padding: 0.5em;">
+                              <span class="float-left"><?php echo $init_t3 . '. ' . $crr_name; ?></span>
+                              <span class="float-right"><?php echo number_format($puntos, 2) ?></span>
+                            </p>
+                          </li>
+                        <?php $init_t3++;
+                        } ?>
+
+                        <li class="nav-item">
+                          <div class="card card-success collapsed-card" style="box-shadow: none">
+                            <div class="card-header"
+                              style="
+                                border-radius: 0;
+                                background: #F7F7F7;
+                                color:black;
+                                height: 2.5em;
+                                display: flex;
+                                padding: 0.5em;
+                                justify-content: flex-end;
+                              ">
+                              <span>Mostrar mas...</span>
+                              <button type="button" class="btn btn-tool" data-card-widget="collapse" style="color:black">
+                                <i class="fas fa-plus"></i>
+                              </button>
+                            </div>
+
+                            <div class="card-body" style="display: none; padding: 0.5em;">
+                              <?php foreach ($top_rest as $crr_id => $puntos) { ?>
+                                <?php $crr_name = $data_studiantes[$crr_id]['alum_1er_apellido'] . ' ' . $data_studiantes[$crr_id]['alum_1er_nombre'] ?>
+
+                                <p style="padding: 0; margin: 0; display: flex; justify-content: space-between;">
+                                  <span><?php echo $init_tr . '. ' . $crr_name; ?></span>
+                                  <span><?php echo number_format($puntos, 2) ?></span>
+                                </p>
+                              <?php $init_tr++;
+                              } ?>
+                            </div>
+
+                          </div>
+                        </li>
+
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-                <div class="icon">
-                  <i class="fas fa-user-tie"></i>
+
+              <?php endif ?>
+
+            <?php } ?>
+
+            <div class="col-md-3">
+
+              <div class="card card-widget widget-user-2 shadow-sm">
+
+                <div class="widget-user-header bg-navy">
+                  <h2 class="widget-user-desc" style="margin:0; font-size:0.9rem">GENERAL</h2>
+                </div>
+                <div class="card-footer p-0">
+                  <ul class="nav flex-column">
+
+                    <?php foreach ($general_tres as $crr_id => $puntos) { ?>
+                      <?php $crr_name = $data_studiantes[$crr_id]['alum_1er_apellido'] . ' ' . $data_studiantes[$crr_id]['alum_1er_nombre'] ?>
+                      <li class="nav-item">
+                        <p style="padding: 0.5em;">
+                          <span class="float-left">
+                            <?php echo $init_g3 . '. ' . $crr_name; ?>
+                            <small><?php echo '- ' . $data_studiantes[$crr_id]['alum_grado'] ?></small>
+                          </span>
+                          <span class="float-right"><?php echo number_format($puntos, 2) ?></span>
+                        </p>
+                      </li>
+                    <?php $init_g3++;
+                    } ?>
+
+                    <li class="nav-item">
+                      <div class="card card-success collapsed-card" style="box-shadow: none">
+                        <div class="card-header"
+                          style="
+                                border-radius: 0;
+                                background: #F7F7F7;
+                                color:black;
+                                height: 2.5em;
+                                display: flex;
+                                padding: 0.5em;
+                                justify-content: flex-end;
+                              ">
+                          <span>Mostrar mas...</span>
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse" style="color:black">
+                            <i class="fas fa-plus"></i>
+                          </button>
+                        </div>
+
+                        <div class="card-body" style="display: none; padding: 0.5em;">
+                          <?php foreach ($general_trres as $crr_id => $puntos) { ?>
+                            <?php $crr_name = $data_studiantes[$crr_id]['alum_1er_apellido'] . ' ' . $data_studiantes[$crr_id]['alum_1er_nombre'] ?>
+
+                            <p style="padding: 0; margin: 0; display: flex; justify-content: space-between;">
+                              <span>
+                                <?php echo $init_gr . '. ' . $crr_name; ?>
+                                <small><?php echo '- ' . $data_studiantes[$crr_id]['alum_grado'] ?></small>
+                              </span>
+                              <span><?php echo number_format($puntos, 2) ?></span>
+                            </p>
+                          <?php $init_gr++;
+                          } ?>
+                        </div>
+
+                      </div>
+                    </li>
+
+                  </ul>
                 </div>
               </div>
+
             </div>
 
           </div>
 
-          <div class="row">
-            <div class="col-lg-6 col-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-purple elevation-1"><i class="fas fa-female"></i></span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Estudiantes de género femenino</span>
-                  <span class="info-box-number">
-                    123
-                    <small><i class="fas fa-heart"></i></small>
-                  </span>
-                </div>
-                <!-- /.info-box-content -->
-              </div>
-            </div>
-            <div class="col-lg-6 col-12">
-              <div class="info-box">
-                <span class="info-box-icon bg-navy elevation-1"><i class="fas fa-male"></i></span>
-                <div class="info-box-content">
-                  <span class="info-box-text">Estudiantes de género masculino</span>
-                  <span class="info-box-number">
-                    123
-                    <small><i class="fas fa-heart"></i></small>
-                  </span>
-                </div>
-                <!-- /.info-box-content -->
-              </div>
-            </div>
+        </div>
+      </div>
 
-          </div>
-        </div><!-- /.container-fluid -->
-      <?php endif; ?>
-      <?php if ($_SESSION['nivel'] == 'NEO') :
-
-        $dgrupo = $_SESSION['alum_grado'];
-        $alum_user_id = $_SESSION['id'];
-        $per = 'TERCERO';
-
-      ?>
-        <div class="container-fluid">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Estan son tus guias entregadas y revisadas hasta ahora, del Periodo: <strong><span><?php echo $per; ?></span></strong></h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-              <table id="alum-reporte" class="table table-bordered table-striped">
-                <thead>
-                  <tr>
-                    <th>Inglés</th>
-                    <th>Naturales</th>
-                    <th>Lenguaje</th>
-                    <th>Matemáticas</th>
-                    <th>Sociales</th>
-                    <th>Informática</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php
-                  try {
-                    $stmt2 = $conn->prepare("SELECT * FROM alumnos WHERE alum_id_logins=?");
-                    $stmt2->bind_param("i", $alum_user_id);
-                    $stmt2->execute();
-                    $resultado2 = $stmt2->get_result();
-                    $datos_alum = $resultado2->fetch_assoc();
-                  } catch (\Exception $e) {
-                    $error = $e->getMessage();
-                    echo $error;
-                  }
-                  $id_alum = $datos_alum['alum_id'];
-                  $materia1 = 'INGLÉS';
-                  $materia2 = 'CIENCIAS NATURALES';
-                  $materia3 = 'LENGUAJE';
-                  $materia4 = 'MATEMÁTICAS';
-                  $materia5 = 'CIENCIAS SOCIALES';
-                  $materia6 = 'INFORMÁTICA';
-                  ?>
-                  <tr>
-                    <td>
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia1, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia2, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia3, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia4, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                    <td>
-
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia5, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <?php
-                        try {
-                          $stmt = $conn->prepare("SELECT * FROM notas_parciales_p2 WHERE notas_p_p2_id_alumno=? AND notas_p_p2_materia=? AND notas_p_p2_periodo=?");
-                          $stmt->bind_param("iss", $id_alum, $materia6, $per);
-                          $stmt->execute();
-                          $notas_ingles2 = $stmt->get_result();
-                          $notas_ingles = $notas_ingles2->fetch_assoc();
-                        } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                        }
-                        ?>
-                        <?php
-
-                        $taller1 = $notas_ingles['notas_p_p2_t1'];
-                        $taller2 = $notas_ingles['notas_p_p2_t2'];
-                        $taller3 = $notas_ingles['notas_p_p2_t3'];
-                        $proyecto = $notas_ingles['notas_p_p2_p'];
-                        $examen = $notas_ingles['notas_p_p2_e'];
-                        if ($taller1 > 0) { ?>
-                          T1 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T1 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        } ?>
-                        <br>
-                        <?php
-                        if ($taller2 > 0) { ?>
-                          T2 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T2 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($taller3 > 0) { ?>
-                          T3 = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          T3 = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($proyecto > 0) { ?>
-                          P = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          P = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-                        <br>
-                        <?php
-
-                        if ($examen > 0) { ?>
-                          E = <i class="fas fa-check" style=color:green;></i>
-                        <?php
-                        } else { ?>
-                          E = <i class="fas fa-times" style=color:red;></i>
-                        <?php
-                        }
-                        ?>
-
-
-                      </p>
-                    </td>
-                  </tr>
-                  <?php
-                  $conn->close();
-                  ?>
-                </tbody>
-              </table>
-              <br>
-              <span>Recuerda que la <i class="fas fa-times" style="color:red;"></i> signfica que no has entregado la guia o que el profesor no la ha revisado y el <i class="fas fa-check" style="color:green;"></i> quiere decir que ya entregaste y que el profesor ya la revisó. <strong> Si ya entregaste tus guias y no te aparecen como revisadas, comunicate con el profesor y solicita que actualice tus entregas.</strong>
-
-              </span>
-            </div>
-            <!-- /.card-body -->
-          </div>
-        </div><!-- /.container-fluid -->
-      <?php endif; ?>
     </section>
     <!-- /.content -->
 

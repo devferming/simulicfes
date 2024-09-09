@@ -1,7 +1,7 @@
 <?php
-  include_once 'funciones/sesiones.php';
-  include_once 'funciones/funciones.php';
-  if($_SESSION['nivel'] == 1):
+include_once 'funciones/sesiones.php';
+include_once 'funciones/funciones.php';
+if ($_SESSION['nivel'] == 1):
   include_once 'templates/header.php';
   include_once 'templates/barra.php';
   include_once 'templates/navegacion.php';
@@ -17,9 +17,9 @@
     $descripcion = $resultado->fetch_assoc();
     $grado_desc = $descripcion['gdo_des_grado'];
   } catch (\Exception $e) {
-      $error = $e->getMessage();
-      echo $error;
-  } 
+    $error = $e->getMessage();
+    echo $error;
+  }
 ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -47,177 +47,127 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-      <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Módulo de gestión<strong></strong></h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-        <table id="mat-lista" class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Prueba</th>
-                <th>Materia</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- :::: ASIGNACIONES PRIMERO PERIODO :::: -->
-              <!-- Taller #1 P1-->
-              
-            <?php
-              $orden = 2;
-              try {
-                $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_grado=?");
-                $stmt->bind_param("s", $grado_desc);
-                $stmt->execute();
-                $resultado = $stmt->get_result();
-                
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Módulo de gestión<strong></strong></h3>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <table id="mat-lista" class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Prueba</th>
+                  <th>Materia</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $orden = 2;
+                try {
+                  $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_grado=?");
+                  $stmt->bind_param("s", $grado_desc);
+                  $stmt->execute();
+                  $resultado = $stmt->get_result();
                 } catch (\Exception $e) {
                   $error = $e->getMessage();
                   echo $error;
-                } 
-            ?>
-              
-            <?php while($existe = $resultado->fetch_assoc()){ ?>
-              <tr>
-            
-                <td> <p>Prueba #<?php echo $existe['simul_orden'] ?> <span class="badge badge-success">Cargado</span></p> </td>
-            
-                <td>
-                  <p><?php echo $existe['simul_materia'] ?></p>
-                </td>
-                <td>
-                  <div class="btn-group" md5>
-                    <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="true">
-                      <span>Desplegar</span>
-                    </button>
-                    <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(68px, 38px, 0px); top: 0px; left: 0px; will-change: transform;">
-                        <a class="dropdown-item" href="preifces-param4.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Actualizar</a>
-                        <a class="dropdown-item" href="preifces-revision.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Revisión</a>
-                        <a class="dropdown-item" href="preifces-entregas.php?simul_id=<?php echo $existe['simul_id'] ?>&grado=<?php echo $grado ?>">Resultados</a>
-                        <a class="dropdown-item" href="#">Analizar(En Desarrollo)</a>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            <?php
-            }
-            ?>
-              
-              <!-- / .Taller #1 P1-->
-            </tbody>
-    <!--        <tfoot>
-              <tr>
-                <th>Materia</th>
-                <th>Orden</th>
-                <th>Acciones</th>
-              </tr>
-            </tfoot> -->
-        </table>
+                }
+                ?>
+
+                <?php while ($existe = $resultado->fetch_assoc()) { ?>
+                  <tr>
+
+                    <td>
+                      <p>Prueba #<?php echo $existe['simul_orden'] ?> <span class="badge badge-success">Cargado</span></p>
+                    </td>
+
+                    <td>
+                      <p><?php echo $existe['simul_materia'] ?></p>
+                    </td>
+                    <td>
+                      <div class="btn-group" md5>
+                        <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="true">
+                          <span>Desplegar</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(68px, 38px, 0px); top: 0px; left: 0px; will-change: transform;">
+                          <a class="dropdown-item" href="preifces-param4.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Actualizar</a>
+                          <a class="dropdown-item" href="preifces-revision.php?grado=<?php echo $grado ?>&id=<?php echo $existe['simul_id'] ?>">Revisión</a>
+                          <a class="dropdown-item" href="preifces-entregas.php?simul_id=<?php echo $existe['simul_id'] ?>&grado=<?php echo $grado ?>">Resultados</a>
+                          <a class="dropdown-item" href="preifces-analisis.php?simul_id=<?php echo $existe['simul_id'] ?>&grado=<?php echo $grado ?>">Analizar</a>
+                          <button class="dropdown-item" onclick="deleteSimul('<?php echo $existe['simul_id'] ?>')">Eliminar</button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                <?php
+                }
+                ?>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
         </div>
-        <!-- /.card-body -->
-      </div>
-      
+
       </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <div class="modal fade" id="modal-metricas">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title"><small>Resumen: <strong><span id="alum_nom_modal2">Fermin</span></strong></small> </h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            <div class="card">
-              <div class="card-body">
-                <!-- we are adding the accordion ID so Bootstrap's collapse plugin detects it -->
-                <div id="accordion">
-                  <div class="card card-primary">
-                    <div class="card-header">
-                      <h4 class="card-title w-100">
-                        <a class="d-block w-100 collapsed" data-toggle="collapse" href="#collapse1" aria-expanded="false">
-                        <span><i class="fas fa-cog"></i> Entregas: <strong id="nro_entregas"></strong></span>
-                        </a>
-                      </h4>
-                    </div>
-                    <div id="collapse1" class="collapse" data-parent="#accordion">
-                      <div class="card-body" id="nombre_entregas">
-                        
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card card-warning">
-                    <div class="card-header">
-                      <h4 class="card-title w-100">
-                        <a class="d-block w-100" data-toggle="collapse" href="#collapse2">
-                        <span><i class="fas fa-cog"></i> Por entregar <strong id="nro_noentregas"></strong></span>
-                        </a>
-                      </h4>
-                    </div>
-                    <div id="collapse2" class="collapse" data-parent="#accordion">
-                      <div class="card-body" id="nombre_noentregas">
-                        
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-            
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.dialog -->
-  </div>
-  <!-- /.modal -->
-  <?php
-    include_once 'templates/footer.php';
-    endif;
-  ?> 
+<?php
+  include_once 'templates/footer.php';
+endif;
+?>
 <script>
-  function desplegarMetricas(id) {
-    var id_taller = id;
-    datos = {
-      avasig: 'consultar',
-      id_guia: id_taller
-    };
-    document.getElementById('nombre_entregas').innerHTML = '';
-    document.getElementById('nombre_noentregas').innerHTML = '';
-    $.ajax({
-      data: datos,
-      url: "av-modelo.php",
-      type: "post",
-      dataType: "json",
-      success: function (data) {
-        var resultado = data;
-        //console.log(resultado.entregaron);
-        var entregas = resultado.entregaron;
-        var noentregas = resultado.no_entregaron;
-        $("#nro_entregas").text(entregas.length);
-        $("#nro_noentregas").text(noentregas.length);
-        //resultado.forEach(element => console.log(element));
-        
-        for (i in entregas) {
-          //console.log(noentregas[i]);
-          $("#nombre_entregas").append('<p>'+entregas[i]+'</p>');
-        }
-        for (i in noentregas) {
-          //console.log(noentregas[i]);
-          $("#nombre_noentregas").append('<p>'+noentregas[i]+'</p>');
-        }
-        
-        
-      },
+  function deleteSimul(id) {
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Los simulacros eliminados no se pueden recuperar",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Aceptar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        const datos = {
+          'simul-comando': 'delete',
+          id
+        };
+
+        $.ajax({
+          data: datos,
+          url: "preifces-modelo.php",
+          type: "POST",
+          dataType: "json",
+          success: function(response) {
+            if (response.respuesta === 'exito') {
+              Swal.fire(
+                '¡Éxito!',
+                'Simulacro eliminado correctamente',
+                'success'
+              );
+              window.location.reload();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Algo salió mal, intente nuevamente o contacte con soporte técnico',
+              });
+            }
+          },
+          error: function() {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de conexión',
+              text: 'No se pudo conectar con el servidor. Inténtalo nuevamente más tarde.',
+            });
+          }
+        });
+
+      }
     });
-  $("#modal-metricas").modal("show");
   }
 </script>

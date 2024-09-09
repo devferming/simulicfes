@@ -766,7 +766,6 @@
 <script>
   function borrarArchivo(r){
     var ruta = r;
-    console.log(ruta);
     datos = {
       ruta: ruta,
     };

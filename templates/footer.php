@@ -104,12 +104,14 @@
   $.widget.bridge('uibutton', $.ui.button)
 </script>
 <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="plugins/chart.js/Chart.min.js"></script>
 <script src="plugins/moment/moment.min.js"></script>
 <script src="plugins/inputmask/min/jquery.inputmask.bundle.min.js"></script>
 <script src="plugins/daterangepicker/daterangepicker.js"></script>
 <script src="plugins/summernote/summernote-bs4.min.js"></script>
 <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <script src="dist/js/adminlte.js"></script>
+<script src="plugins/jquery-knob/jquery.knob.min.js"></script>
 <script src="dist/js/demo.js"></script>
 <script src="plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
 <script src="plugins/select2/js/select2.full.min.js"></script>

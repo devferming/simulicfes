@@ -1,10 +1,12 @@
 <?php
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   include_once 'funciones/funciones.php';
   date_default_timezone_set('America/Bogota');
   $hoy = date("Y-m-d H:i:s");
   $fech2 = date('Y-m-d');
   $anio_actual = date("Y");
+
   //::::::::REGISTRAR GUIA::::::::://
   if ($_POST['simul-comando'] == 'nuevo') {
     $inst = htmlspecialchars($_POST['simul-inst'], ENT_QUOTES, 'UTF-8');
@@ -596,16 +598,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $type = htmlspecialchars($_POST['nuevo_plazo_type'], FILTER_SANITIZE_NUMBER_INT);
     $plazo = htmlspecialchars($_POST['datos_nuevo_plazo'], ENT_QUOTES, 'UTF-8');
 
-    if ($type === 1) {
+
+    if ($type == 1) {
       try {
         $stmt = $conn->prepare("UPDATE simulacros_e SET simule_hora_final=?, simule_editado=NOW() WHERE simule_simul_id=? AND simule_alum_id=?");
         $stmt->bind_param("sii", $plazo, $simul, $alum);
         $stmt->execute();
         if ($stmt->affected_rows) {
           $respuesta = array(
-            'respuesta' => 'exito',
-            'id_creado' => $id_registro,
-            'grado' => $cod_grado
+            'respuesta' => 'exito'
           );
         } else {
           $respuesta = array(
@@ -615,7 +616,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       } catch (Exception $e) {
         echo "Error:" . $e->getMessage();
       }
-    } else {
+    } /* else {
       try {
         $status = 1;
         $stmt = $conn->prepare("INSERT INTO simulacros_e (simule_simul_id, simule_alum_id, simule_hora_final, simule_status, simule_editado) VALUES (?, ?, ?, ?, ?)");
@@ -623,9 +624,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
         if ($stmt->insert_id) {
           $respuesta = array(
-            'respuesta' => 'exito',
-            'id_creado' => $id_registro,
-            'grado' => $cod_grado
+            'respuesta' => 'exito'
           );
         } else {
           $respuesta = array(
@@ -635,6 +634,45 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       } catch (Exception $e) {
         echo "Error:" . $e->getMessage();
       }
+    } */
+
+    $stmt->close();
+    $conn->close();
+
+    die(json_encode($respuesta));
+  }
+  //::::::::ASIGNAR NUEVO PLAZO::::::::://
+  if ($_POST['simul-comando'] == 'delete') {
+
+    $id_borrar = htmlspecialchars($_POST['id'], FILTER_SANITIZE_NUMBER_INT);
+
+    try {
+
+      $stmt = $conn->prepare("DELETE FROM simulacros WHERE simul_id=?");
+      $stmt->bind_param("i", $id_borrar);
+      $stmt->execute();
+
+      if ($stmt->affected_rows) {
+        $stmt = $conn->prepare("DELETE FROM simulacros_r WHERE simulr_simul_id=?");
+        $stmt->bind_param("i", $id_borrar);
+        $stmt->execute();
+
+        $stmt = $conn->prepare("DELETE FROM simulacros_e WHERE simule_simul_id=?");
+        $stmt->bind_param("i", $id_borrar);
+        $stmt->execute();
+
+        $respuesta = array(
+          'respuesta' => 'exito'
+        );
+
+      } else {
+        $respuesta = array(
+          'respuesta' => 'error'
+        );
+      }
+
+    } catch (Exception $e) {
+      echo "Error:" . $e->getMessage();
     }
 
     $stmt->close();

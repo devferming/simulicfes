@@ -1,7 +1,7 @@
 <?php
-  include_once 'funciones/sesiones.php';
-  include_once 'funciones/funciones.php';
-  if($_SESSION['nivel'] == 3):
+include_once 'funciones/sesiones.php';
+include_once 'funciones/funciones.php';
+if ($_SESSION['nivel'] == 3):
   include_once 'templates/header.php';
   include_once 'templates/barra.php';
   include_once 'templates/navegacion.php';
@@ -20,7 +20,6 @@
     $result_id2 = $result_id->fetch_assoc();
     $prof_idx2 = $result_id2['users_id'];
     $prof_mat = $_SESSION['users_mat'];
-    
   } catch (\Exception $e) {
     $error = $e->getMessage();
     echo $error;
@@ -33,7 +32,6 @@
     $result_prof_mat2 = $result_prof_mat->fetch_assoc();
     $prof_mat_rev = $result_prof_mat2['mat_rev_simul'];
     $prof_mat_rev2 = $result_prof_mat2['mat_rev_simul2'];
-    
   } catch (\Exception $e) {
     $error = $e->getMessage();
     echo $error;
@@ -46,9 +44,9 @@
     $descripcion = $resultado->fetch_assoc();
     $grado_desc = $descripcion['gdo_des_grado'];
   } catch (\Exception $e) {
-      $error = $e->getMessage();
-      echo $error;
-  } 
+    $error = $e->getMessage();
+    echo $error;
+  }
 ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -75,57 +73,57 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-      <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Simulacros publicados en el grado: <strong><?php echo $grado_desc; ?></strong></h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-        <table id="asig-lista" class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Asignación</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- :::: ASIGNACIONES PUBLICADAS :::: -->
-              <?php
-                    try {
-                      $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_grado=?");
-                      $stmt->bind_param("s", $grado_desc);
-                      $stmt->execute();
-                      $resultado = $stmt->get_result();
-                    } catch (\Exception $e) {
-                        $error = $e->getMessage();
-                        echo $error;
-                    }
-                    while($datos_guia = $resultado->fetch_assoc()){ 
-                      
-                      $id_simul = $datos_guia['simul_id'];
-                      try {
-                        $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_id=?");
-                        $stmt->bind_param("i", $id_simul);
-                        $stmt->execute();
-                        $resultado_simul = $stmt->get_result();
-                        $resultado_simul2 = $resultado_simul->fetch_assoc();
-                      } catch (\Exception $e) {
-                          $error = $e->getMessage();
-                          echo $error;
-                      }
-                      $simul_rev_content = $resultado_simul2["" . $prof_mat_rev . ""];
-                      $datos_rev = json_decode($simul_rev_content, true);
-                      
-                      if ($datos_rev["" . $prof_mat_rev2 . ""] == 'SI') { ?>
-                        <tr>
-                          <td>
-                            <p>Simulacro #<?php echo $datos_guia['simul_orden'];?></p>
-                            
-                            <?php
-                              
-                              /*
-                              try {
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Simulacros publicados en el grado: <strong><?php echo $grado_desc; ?></strong></h3>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <table id="asig-lista" class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Asignación</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- :::: ASIGNACIONES PUBLICADAS :::: -->
+                <?php
+                try {
+                  $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_grado=?");
+                  $stmt->bind_param("s", $grado_desc);
+                  $stmt->execute();
+                  $resultado = $stmt->get_result();
+                } catch (\Exception $e) {
+                  $error = $e->getMessage();
+                  echo $error;
+                }
+                while ($datos_guia = $resultado->fetch_assoc()) {
+
+                  $id_simul = $datos_guia['simul_id'];
+                  try {
+                    $stmt = $conn->prepare("SELECT * FROM simulacros WHERE simul_id=?");
+                    $stmt->bind_param("i", $id_simul);
+                    $stmt->execute();
+                    $resultado_simul = $stmt->get_result();
+                    $resultado_simul2 = $resultado_simul->fetch_assoc();
+                  } catch (\Exception $e) {
+                    $error = $e->getMessage();
+                    echo $error;
+                  }
+                  $simul_rev_content = $resultado_simul2["" . $prof_mat_rev . ""];
+                  $datos_rev = json_decode($simul_rev_content, true);
+
+                  if ($datos_rev["" . $prof_mat_rev2 . ""] == 'SI') { ?>
+                    <tr>
+                      <td>
+                        <p>Simulacro #<?php echo $datos_guia['simul_orden']; ?></p>
+
+                        <?php
+
+
+                        /* try {
                                 $stmt = $conn->prepare("SELECT simule_status FROM simulacros_e WHERE simule_simul_id=? AND simule_alum_id=?");
                                 $stmt->bind_param("ii", $id_simul, $alum_idx2);
                                 $stmt->execute();
@@ -141,52 +139,60 @@
                                 } else { ?>
                                   <span class="badge badge-warning">No entregado</span></p>
                                 <?php  
-                                }
-                              */
-                                ?>
-                              
-                          </td>
-                          <td>
-                            <?php
-                            $nac_fec1 = $datos_guia['simul_fecha'];
-                            $nac_fec = DateTime::createFromFormat('Y-m-d', $nac_fec1)->format('d-m-Y'); 
-                            ?>
-                            <p><?php echo $nac_fec;?></p>
-                          </td>
-                          <td>
-                            <div class="btn-group" md5>
-                            <a class="btn btn-success" href="preifces-param3.php?id=<?php echo 	$datos_guia['simul_id'] ?>">Explorar</a>
-                            </div>
-                          </td>
-                        </tr>
-                      
-                      <?php
-                      }
-                      
-                    };
-              $conn->close();
-              $stmt->close();
-              ?>
-              <!-- :::: /ASIGNACIONES PUBLICADAS :::: -->
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Asignación</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-            </tfoot>
-        </table>
+                                } */
+
+                        ?>
+
+                      </td>
+                      <td>
+                        <?php
+                        $nac_fec1 = $datos_guia['simul_fecha'];
+                        $nac_fec = DateTime::createFromFormat('Y-m-d', $nac_fec1)->format('d-m-Y');
+                        ?>
+                        <p><?php echo $nac_fec; ?></p>
+                      </td>
+                      <td>
+
+                        <div class="btn-group" md5>
+                          <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="true">
+                            <span>Opciones</span>
+                          </button>
+                          <div class="dropdown-menu" role="menu" x-placement="bottom-start" style="position: absolute; transform: translate3d(68px, 38px, 0px); top: 0px; left: 0px; will-change: transform;">
+                            <a class="dropdown-item" href="preifces-param3.php?id=<?php echo   $datos_guia['simul_id'] ?>">Explorar</a>
+                            <a class="dropdown-item" href="preifces-entregas.php?simul_id=<?php echo $datos_guia['simul_id'] ?>&grado=<?php echo $grado ?>">Resultados</a>
+                            <a class="dropdown-item" href="preifces-analisis.php?simul_id=<?php echo $datos_guia['simul_id'] ?>&grado=<?php echo $grado ?>">Analizar</a>
+                          </div>
+                        </div>
+
+                      </td>
+                    </tr>
+
+                <?php
+                  }
+                };
+                $conn->close();
+                $stmt->close();
+                ?>
+                <!-- :::: /ASIGNACIONES PUBLICADAS :::: -->
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Asignación</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!-- /.card-body -->
         </div>
-        <!-- /.card-body -->
-      </div>
-      
+
       </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <?php
-    include_once 'templates/footer.php';
-    endif;
-  ?> 
+<?php
+  include_once 'templates/footer.php';
+endif;
+?>

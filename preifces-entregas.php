@@ -1,7 +1,7 @@
 <?php
 include_once 'funciones/sesiones.php';
 include_once 'funciones/funciones.php';
-if ($_SESSION['nivel'] == 1) :
+if ($_SESSION['nivel'] == 1 || $_SESSION['nivel'] == 3) :
   include_once 'templates/header.php';
   include_once 'templates/barra.php';
   include_once 'templates/navegacion.php';
@@ -128,16 +128,27 @@ if ($_SESSION['nivel'] == 1) :
                               $crr_mats = array();
                               $crr_mats2 = array();
 
+                              $crr_mat = $_SESSION['users_mat'];
 
-                              $arrMateria = array(
-                                'Inglés' => array('simulr_ingles', 'simul_materia_ingles', 'ingles_p1', 'ingles_p2', 'ingles'),
-                                'Naturales' => array('simulr_naturales', 'simul_materia_naturales', 'naturales_p1', 'naturales_p2', 'naturales'),
-                                'Lenguaje' => array('simulr_lenguaje', 'simul_materia_lenguaje', 'lenguaje_p1', 'lenguaje_p2', 'lenguaje'),
-                                'Matemáticas' => array('simulr_matematicas', 'simul_materia_matematicas', 'matematicas_p1', 'matematicas_p2', 'matematicas'),
-                                'Sociales' => array('simulr_sociales', 'simul_materia_sociales', 'sociales_p1', 'sociales_p2', 'sociales'),
-                                'Filosofía' => array('simulr_filosofia', 'simul_materia_filosofia', 'filosofia_p1', 'filosofia_p2', 'filosofia'),
-                                'Física' => array('simulr_fisica', 'simul_materia_fisica', 'fisica_p1', 'fisica_p2', 'fisica'),
+                              $materias = array(
+                                  'INGLÉS' => array('Inglés', 'simulr_ingles', 'simul_materia_ingles', 'ingles_p1', 'ingles_p2', 'ingles'),
+                                  'CIENCIAS NATURALES' => array('Naturales', 'simulr_naturales', 'simul_materia_naturales', 'naturales_p1', 'naturales_p2', 'naturales'),
+                                  'LENGUAJE' => array('Lenguaje', 'simulr_lenguaje', 'simul_materia_lenguaje', 'lenguaje_p1', 'lenguaje_p2', 'lenguaje'),
+                                  'MATEMÁTICAS' => array('Matemáticas', 'simulr_matematicas', 'simul_materia_matematicas', 'matematicas_p1', 'matematicas_p2', 'matematicas'),
+                                  'CIENCIAS SOCIALES' => array('Sociales', 'simulr_sociales', 'simul_materia_sociales', 'sociales_p1', 'sociales_p2', 'sociales'),
+                                  'FILOSOFÍA' => array('Filosofía', 'simulr_filosofia', 'simul_materia_filosofia', 'filosofia_p1', 'filosofia_p2', 'filosofia'),
+                                  'FÍSICA' => array('Física', 'simulr_fisica', 'simul_materia_fisica', 'fisica_p1', 'fisica_p2', 'fisica')
                               );
+                          
+                              if (isset($materias[$crr_mat])) {
+                                  $arrMateria = array(
+                                      $materias[$crr_mat][0] => array_slice($materias[$crr_mat], 1)
+                                  );
+                              } else {
+                                  $arrMateria = array_map(function($materia) {
+                                      return array_slice($materia, 1);
+                                  }, $materias);
+                              }
 
                               foreach ($arrMateria as $key => $value) {
 
@@ -153,62 +164,67 @@ if ($_SESSION['nivel'] == 1) :
                                   $crr_mats[$key] = $value[4];
                                   $control = $simul_p1; ?>
 
-                                    <tr>
-                                      <td>
-                                        <small><strong><?php echo $key ?> </strong></small><br>
-                                        <div class="divResIcfes__Container">
-                                          <?php
-                                          for ($i = $simul_p1; $i <= $simul_p2; $i++) {
-                                            $respuesta_profesor = $si_ingles["" . 'p-' . $control . ""];
-                                            $respuesta_alumno = $respuestas_alum["" . 'p-' . $control . ""];
+                            <tr>
+                              <td>
+                                <small><strong><?php echo $key ?> </strong></small><br>
+                                <div class="divResIcfes__Container">
+                                  <?php
+                                  for ($i = $simul_p1; $i <= $simul_p2; $i++) {
+                                    $respuesta_profesor = $si_ingles["" . 'p-' . $control . ""];
+                                    $respuesta_alumno = $respuestas_alum["" . 'p-' . $control . ""];
+                                    
+                                    if ($respuesta_alumno === ' ' || !isset($respuesta_alumno)) {
+                                      $respuesta_alumno = 'X';
+                                    }
 
-                                            if ($respuesta_profesor === $respuesta_alumno) {
-                                              $correctas += 1;
-                                              $total_correctas += 1;
-                                              $resp_bg = 'divResIcfes__span--bg1';
-                                            } else {
-                                              $incorrectas += 1;
-                                              $total_incorrectas += 1;
-                                              $resp_bg = 'divResIcfes__span--bg2';
-                                            }
+                                    if ($respuesta_profesor === $respuesta_alumno) {
+                                      $correctas += 1;
+                                      $total_correctas += 1;
+                                      $resp_bg = 'divResIcfes__span--bg1';
+                                    } else {
+                                      $incorrectas += 1;
+                                      $total_incorrectas += 1;
+                                      $resp_bg = 'divResIcfes__span--bg2';
+                                    }
 
-                                            if (!isset($respuesta_profesor)) {
-                                              $resp_bg = 'divResIcfes__span--bg3';
-                                            }
+                                    if (!isset($respuesta_profesor)) {
+                                      $resp_bg = 'divResIcfes__span--bg3';
+                                    }
 
-                                            if (!isset($respuesta_alumno)) {
-                                              $resp_bg = 'divResIcfes__span--bg3';
-                                            }
+                                    if (!isset($respuesta_alumno)) {
+                                      $resp_bg = 'divResIcfes__span--bg3';
+                                    }
 
-                                            ?>
-                                            <div class="divResIcfes">
-                                              <label class="divResIcfes__label"><?php echo $control ?></label>
-                                              <span class="divResIcfes__span <?php echo $resp_bg ?>"><?php echo $respuesta_alumno ?></span>
-                                            </div>
-                                          <?php $control += 1; }
+                                  ?>
+                                    <div class="divResIcfes">
+                                      <label class="divResIcfes__label"><?php echo $control ?></label>
+                                      <span class="divResIcfes__span <?php echo $resp_bg ?>"><?php echo $respuesta_alumno ?></span>
+                                    </div>
+                                  <?php $control += 1;
+                                  }
 
-                                          $total_preguntas = $correctas + $incorrectas;
-                                          $puntaje2 = $correctas * 100 / $total_preguntas;
-                                          $puntaje = number_format($puntaje2, 2);
-                                          $puntaje_global += $puntaje;
-                                          $puntajes_materias[$alum_id][$value[4]] = $puntaje;
-                                          $puntajes_materias[$alum_id]['nombre'] = $nombre_alum;
+                                  $total_preguntas = $correctas + $incorrectas;
+                                  $puntaje2 = $correctas * 100 / $total_preguntas;
+                                  $puntaje = number_format($puntaje2, 2);
+                                  $puntaje_global += $puntaje;
+                                  $puntajes_materias[$alum_id][$value[4]] = $puntaje;
+                                  $puntajes_materias[$alum_id]['nombre'] = $nombre_alum;
 
-                                          ?>
-                                        </div>
-                                        <br>
-                                        <span>
-                                          <i class="fas fa-check"></i><?php echo $correctas ?>&nbsp&nbsp
-                                          <i class="fas fa-times"></i><?php echo $incorrectas ?>&nbsp&nbsp
-                                          <i class="fas fa-trophy"></i><?php echo $puntaje . '/100' ?>
-                                        </span>
-                                      </td>
-                                    </tr>
+                                  ?>
+                                </div>
+                                <br>
+                                <span>
+                                  <i class="fas fa-check"></i><?php echo $correctas ?>&nbsp&nbsp
+                                  <i class="fas fa-times"></i><?php echo $incorrectas ?>&nbsp&nbsp
+                                  <i class="fas fa-trophy"></i><?php echo $puntaje . '/100' ?>
+                                </span>
+                              </td>
+                            </tr>
 
-                                <?php
-                                          $puntaje_max += 100;
-                                        }
-                                      }
+                        <?php
+                                  $puntaje_max += 100;
+                                }
+                              }
 
 
 
@@ -231,7 +247,12 @@ if ($_SESSION['nivel'] == 1) :
                           <td>
                             <small><strong>Hora de finalización:</strong></small><br>
                             <span class="info-box-text"><i class="fas fa-clock"></i> <?php echo $info_simul['simule_hora_final'] ?></span>
-                            <button class="badge bg-warning" onclick="ModalNuevoPlazo('<?php echo $info_simul['simule_hora_final'] ?>', '<?php echo $simul_id ?>', '<?php echo $alum_id ?>', '1')" style="border: 0px;">+ tiempo</button>
+                            <button class="badge bg-warning"
+                              onclick="ModalNuevoPlazo(
+                              '<?php echo $info_simul['simule_hora_final'] ?>',
+                              '<?php echo $simul_id ?>',
+                              '<?php echo $alum_id ?>',
+                              '1')" style="border: 0px;">+ tiempo</button>
                             <br>
                           </td>
                         </tr>
@@ -252,10 +273,10 @@ if ($_SESSION['nivel'] == 1) :
                     <div class="card-tools">
                       <i class="fas fa-exclamation-circle" style="color:#DC3545"></i><span> No presentó</span>
                       <?php
-                        $now = date("Y-m-d H:i:s");
-                        $min = 120;
-                        $fec = strtotime('+' . $min . ' minute', strtotime($now));
-                        $fec = date('m/d/Y h:i A', $nuevafecha);
+                      $now = date("Y-m-d H:i:s");
+                      $min = 120;
+                      $fec = strtotime('+' . $min . ' minute', strtotime($now));
+                      $fec = date('m/d/Y h:i A', $nuevafecha);
                       ?>
                       <button class="badge bg-warning" onclick="ModalNuevoPlazo(
                         '<?php echo $fec ?>',
@@ -456,6 +477,14 @@ endif;
 </script>
 <script>
   function volverListaAsig(grado) {
-    window.location.href = 'preifces-lista.php?grado=' + grado;
+    const crrNivel = <?php echo $_SESSION['nivel'] ?>;
+    let location = ''
+
+    if (crrNivel === 1) {
+      location = 'preifces-lista.php?grado='
+    } else if (crrNivel === 3) {
+      location = 'preifces-lista3.php?grado='
+    }
+    window.location.href = location + grado;
   }
 </script>

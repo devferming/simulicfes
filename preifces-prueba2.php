@@ -43,6 +43,16 @@ if ($_SESSION['nivel'] == 3) :
     $error = $e->getMessage();
     echo $error;
   }
+
+  $simul_rev_array = array(
+    'simul_materia_ingles' => array('ingles', 'card-warning'),
+    'simul_materia_naturales' => array('naturales', 'card-primary'),
+    'simul_materia_lenguaje' => array('lenguaje', 'card-secondary'),
+    'simul_materia_matematicas' => array('matematicas', 'card-info'),
+    'simul_materia_sociales' => array('sociales', 'card-danger'),
+    'simul_materia_filosofia' => array('filosofia', 'card-navy'),
+    'simul_materia_fisica' => array('fisica', 'card-success'),
+  );
 ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -78,8 +88,8 @@ if ($_SESSION['nivel'] == 3) :
             </div>
 
             <div class="card-tools">
-              <button type="button" class="btn btn-tool" onclick="desplegar2();">
-                <i class="fas fa-edit"></i> Anotar </button>
+              <button type="button" class="btn btn-tool" onclick="desplegar2();"><i class="fas fa-edit"></i> Anotar </button>
+              <button type="button" class="btn btn-tool" onclick="copiar();"><i class="fa-regular fa-copy"></i> Copiar </button>
             </div>
           </div>
           <div class="card-body p-0" style="display: block;">
@@ -111,16 +121,6 @@ if ($_SESSION['nivel'] == 3) :
               <!-- we are adding the accordion ID so Bootstrap's collapse plugin detects it -->
               <div id="accordion">
                 <?php
-
-                $simul_rev_array = array(
-                  'simul_materia_ingles' => array('ingles', 'card-warning'),
-                  'simul_materia_naturales' => array('naturales', 'card-primary'),
-                  'simul_materia_lenguaje' => array('lenguaje', 'card-secondary'),
-                  'simul_materia_matematicas' => array('matematicas', 'card-info'),
-                  'simul_materia_sociales' => array('sociales', 'card-danger'),
-                  'simul_materia_filosofia' => array('filosofia', 'card-navy'),
-                  'simul_materia_fisica' => array('fisica', 'card-success'),
-                );
 
                 $mat_etiqueta = $simul_rev_array[$result_mat_desc][1];
                 $mat_p1 = $simul_rev_array[$result_mat_desc][0] . '_p1';
@@ -260,6 +260,79 @@ if ($_SESSION['nivel'] == 3) :
     <!-- /.modal-dialog -->
   </div>
   <!-- /.modal -->
+
+  <div class="modal fade" id="modal-simules">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <small>
+              Copiar respuestas a:
+            </small>
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="card-body">
+
+            <div class="col-sm-12">
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa-regular fa-paste"></i></span>
+                  </div>
+                  <select class="form-control bloquear" name="copyTo" id="copyTo">
+
+                    <?php
+
+                    try {
+                      $stmt = $conn->prepare("SELECT * FROM simulacros");
+                      $stmt->execute();
+                      $resp = $stmt->get_result();
+                    } catch (\Exception $e) {
+                      $error = $e->getMessage();
+                      echo $error;
+                    }
+
+
+                    while ($sils = $resp->fetch_assoc()) { ?>
+
+                      <?php $crr_config = json_decode($sils[$result_mat_desc], true); ?>
+
+                      <?php
+                      if ($crr_config[$simul_rev_array[$result_mat_desc][0] . '_status'] === 'SI' && $sils['simul_id'] != $id_simul) { ?>
+                        <option value="<?php echo $sils['simul_id'] ?>" class="seleccionados"><?php echo $sils['simul_grado'] . ' - #' . $sils['simul_orden'] ?></option>
+                      <?php }
+                      ?>
+
+                    <?php }
+
+                    ?>
+
+                  </select>
+                  <div class="invalid-feedback">
+                    Este campo es obligatorio.
+                  </div>
+                </div>
+              </div>
+            </div> <!-- col -->
+
+
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" id="cerrar_modal_copia" data-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-info" onclick="copySend()">Aplicar</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 <?php
   include_once 'templates/footer.php';
 endif;
@@ -270,11 +343,40 @@ endif;
   }
 </script>
 <script>
-  function desplegar2( /*p1, p2, p3, p4, p5, p6*/ ) {
+
+  function desplegar2() {
+    document.querySelector('#evaluacion').setAttribute('value', <?php echo "'".$id_simul."'" ?>)
     $("#modal-notasp").modal("show");
   }
+
+  function copiar() {
+    $("#modal-simules").modal("show");
+  }
+
+  function copySend() {
+    const SimulId = document.querySelector('#copyTo')
+    document.querySelector('#evaluacion').setAttribute('value', SimulId.value)
+
+    const crrForm = document.querySelector('#respuestas_simulacro2')
+
+    const event = new Event('submit', {
+        bubbles: true,
+        cancelable: true
+    });
+
+    $("#modal-simules").modal("hide");
+    crrForm.dispatchEvent(event);
+
+  }
+
   $('#cerrar_modal_nota').on('click', function(e) {
     //console.log('cerrar mdodal');
     $('.seleccionados').attr('selected', false);
   })
+
+  $('#cerrar_modal_copia').on('click', function(e) {
+    //console.log('cerrar mdodal');
+    $('.seleccionados').attr('selected', false);
+  })
+
 </script>

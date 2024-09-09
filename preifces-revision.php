@@ -120,10 +120,6 @@ if ($_SESSION['nivel'] == 1) :
                   foreach ($arrMateria as $key => $value) {
                     $simul_param = json_decode($info_simul[$value[1]], true);
 
-/*                     echo '<pre>';
-                      print_r($simul_param);
-                    echo '</pre>'; */
-
                     if ($simul_param[$value[4] . '_status'] === 'SI') {
                       $arr_revisiones = json_decode($revisiones[$value[0]], true);
 
